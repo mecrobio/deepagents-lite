@@ -1,0 +1,15 @@
+# Configuration for 350M models - Chat Only (NO TOOLS)
+# Use this if you just want conversational assistance without tool use
+# Fastest responses, but cannot perform any file operations
+
+[models]
+default = "openai:granite4:350m-h"
+
+[models.providers.openai]
+base_url = "http://localhost:8080/v1"
+models = ["granite4:350m-h"]
+
+[lite]
+enabled = true
+system_prompt_path = "~/.deepagents/lite_prompt_granite4_350m_chat.md"
+disabled_tools = ["all"]

@@ -3002,6 +3002,9 @@ class DeepAgentsApp(App):
         prev_context_limit = settings.model_context_limit
         result.apply_to_settings()
 
+        # Load lite config for model switching
+        lite_config = ModelConfig.load().lite
+
         try:
             new_agent, new_backend = create_cli_agent(
                 model=result.model,
@@ -3012,6 +3015,7 @@ class DeepAgentsApp(App):
                 auto_approve=self._auto_approve,
                 checkpointer=self._checkpointer,
                 mcp_server_info=self._mcp_server_info,
+                lite_config=lite_config,
             )
         except Exception as e:
             # Roll back settings so the running agent isn't misrepresented.

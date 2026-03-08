@@ -1,0 +1,16 @@
+# Configuration for 350M parameter models (ultra-minimal)
+# Best for: Simple file editing, code review, basic assistance
+# NOT recommended for: Complex tasks, web search, multi-step operations
+
+[models]
+default = "openai:granite4:350m-h"
+
+[models.providers.openai]
+base_url = "http://localhost:8080/v1"
+models = ["granite4:350m-h"]
+
+[lite]
+enabled = true
+system_prompt_path = "~/.deepagents/lite_prompt_granite4_350m.md"
+# Only enable essential file operations
+enabled_tools = ["read_file", "write_file", "edit_file", "list_files"]
