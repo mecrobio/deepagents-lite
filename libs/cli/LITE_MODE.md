@@ -97,6 +97,60 @@ For the best experience in lite mode, we recommend the following IBM Granite 4 H
 
 Check the `recommended_configs/` directory in the project root for starter configuration files for each of these models.
 
+?## Tool Availability Matrix
+
+The following table shows all available tools in Deep Agents CLI and their availability across lite mode profiles:
+
+| Tool | Category | 350M | 1B | 3B | Description |
+|------|----------|------|----|----|-------------|
+| **Filesystem Tools** |
+| `list_files` (alias: `ls`) | filesystem | ✅ | ✅ | ✅ | List files and directories in a path |
+| `read_file` | filesystem | ✅ | ✅ | ✅ | Read file content with line numbers (supports pagination) |
+| `write_file` | filesystem | ✅ | ✅ | ✅ | Create a new file |
+| `edit_file` | filesystem | ✅ | ✅ | ✅ | Perform exact string replacements in files |
+| **Search Tools** |
+| `glob` | search | ❌ | ✅ | ✅ | Find files matching a glob pattern (e.g., `**/*.py`) |
+| `grep` | search | ❌ | ✅ | ✅ | Search for text patterns across files |
+| **Shell Tools** |
+| `execute` | shell | ❌ | ✅ | ✅ | Run shell commands (requires sandbox backend) |
+| **Web Tools** (disabled in all lite profiles) |
+| `web_search` | web | ❌ | ❌ | ❌ | Search the web using Tavily API |
+| `fetch_url` | web | ❌ | ❌ | ❌ | Fetch and convert URL content to markdown |
+| `http_request` | web | ❌ | ❌ | ❌ | Make HTTP requests to APIs |
+| **Advanced Tools** (disabled in all lite profiles) |
+| `task` | advanced | ❌ | ❌ | ❌ | Delegate work to subagents |
+| `compact_conversation` | advanced | ❌ | ❌ | ❌ | Summarize conversation history |
+| **Planning Tools** |
+| `write_todos` | planning | ✅ | ✅ | ✅ | Manage todo list for multi-step tasks |
+| **MCP Tools** (disabled in all lite profiles) |
+| MCP server tools | mcp | ❌ | ❌ | ❌ | Dynamic tools from Model Context Protocol servers |
+
+### Tool Count Summary
+
+- **Granite 4 350M**: 4 core tools (filesystem only)
+- **Granite 4 1B**: 7 tools (filesystem + search + shell)
+- **Granite 4 3B**: 7 tools (same as 1B, with enhanced model capacity)
+
+### Tool Categories
+
+Tools are organized into categories for easy configuration:
+
+```python
+"filesystem": ["list_files", "read_file", "write_file", "edit_file"]
+"search": ["glob", "grep"]
+"shell": ["execute"]
+"web": ["web_search", "fetch_url", "http_request"]
+"advanced": ["task", "compact_conversation"]
+```
+
+You can enable entire categories in your config:
+
+```toml
+[lite]
+enabled = true
+enabled_tools = ["filesystem", "search"]  # Enable by category
+```
+
 ## Examples
 
 ### Using Granite 4 350M (Minimum Tools)
