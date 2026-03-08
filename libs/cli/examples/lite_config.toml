@@ -2,79 +2,45 @@
 # Optimized for IBM Granite 4 Hybrid models
 # Copy to ~/.deepagents/config.toml
 
+# ============================================
+# Model Configuration
+# ============================================
+
+[models]
+# Default model to use
+# Granite 4 350M is surprisingly capable for its size!
+default = "openai:ibm/granite-4-350m-instruct"
+
+# ============================================
+# Lite Mode Configuration
+# ============================================
+
 [lite]
 # Enable lite mode optimized for small language models
 enabled = true
 
-# Path to distilled system prompt (required when lite mode enabled)
-# Choose based on your model size:
-# - lite_prompt_granite4_350m.md: ~800 tokens (350M-700M params)
-# - lite_prompt_granite4_1b.md: ~1500 tokens (1B-2B params)
-# - lite_prompt_granite4_3b.md: ~2200 tokens (3B-7B params)
-system_prompt_path = "~/.deepagents/lite_prompt_granite4_1b.md"
-
-# Tool control (choose ONE approach below)
-
-# APPROACH 1: Disable specific tools (blacklist)
-disabled_tools = [
-    "web_search",          # Tavily API (requires key, high context)
-    "fetch_url",           # Web page fetching (high context)
-    "mcp",                 # All MCP server tools (varies)
-    "task",                # Subagents (very high context)
-]
-
-# APPROACH 2: Enable only specific tools (whitelist)
-# enabled_tools = [
-#     "read_file",
-#     "write_file",
-#     "edit_file",
-#     "list_files",
-#     "grep",
-#     "execute",
-# ]
-
-# APPROACH 3: Use categories
-# disabled_tools = ["web", "mcp", "advanced"]
-
-# Note: You can mix tool names and categories
-# Categories: filesystem, shell, web, mcp, advanced
+# That's it! Deep Agents will automatically detect the best 
+# system prompt and toolset based on your model name.
 
 # ============================================
-# Complete Tool Reference
-# ============================================
-# filesystem: read_file, write_file, edit_file, list_files, glob, grep
-# shell: execute
-# web: http_request, fetch_url, web_search
-# mcp: (all MCP server tools)
-# advanced: task, compact_conversation
-#
-# Example prompts are optimized for IBM Granite 4 Hybrid models but can
-# be adapted for other small models (Qwen, Gemma, Phi, etc.)
-
-# ============================================
-# Recommended Configurations
+# Manual Overrides (Optional)
 # ============================================
 
-# Ultra-Minimal (350M parameters - Granite 4 Hybrid 350M)
-# [lite]
-# enabled = true
-# system_prompt_path = "~/.deepagents/lite_prompt_granite4_350m.md"
-# enabled_tools = ["read_file", "write_file", "edit_file", "list_files"]
+# You can still explicitly configure prompts and tools if needed:
 
-# Development Assistant (1B-2B parameters - Granite 4 Hybrid 1B)
-# [lite]
-# enabled = true
-# system_prompt_path = "~/.deepagents/lite_prompt_granite4_1b.md"
-# disabled_tools = ["web_search", "fetch_url", "mcp", "task"]
+# system_prompt_path = "~/.deepagents/custom_prompt.md"
 
-# Code Review Only (Read-Only - Granite 4 Hybrid 3B)
-# [lite]
-# enabled = true
-# system_prompt_path = "~/.deepagents/lite_prompt_granite4_3b.md"
-# enabled_tools = ["read_file", "list_files", "glob", "grep"]
+# Disable specific heavy tools
+# disabled_tools = ["web", "mcp", "task"]
 
-# Local Development (No External APIs)
-# [lite]
-# enabled = true
-# system_prompt_path = "~/.deepagents/lite_prompt_granite4_1b.md"
-# disabled_tools = ["web", "mcp"]  # Disables all web and MCP tools
+# OR Enable only specific categories
+# enabled_tools = ["filesystem"]
+
+# Categories: filesystem, search, shell, web, mcp, advanced
+
+# ============================================
+# Recommended Models
+# ============================================
+# - ibm/granite-4-350m-instruct
+# - ibm/granite-4-1b-instruct
+# - ibm/granite-4-3b-instruct

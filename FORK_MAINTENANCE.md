@@ -21,7 +21,7 @@ This document describes the maintenance strategy for the `deepagents-lite` fork,
 - **Purpose:** All Granite 4 / lite mode customizations
 - **Contains:**
   - Modified files (4): `model_config.py`, `agent.py`, `main.py`, `README.md`
-  - New files (6+): `lite_tools.py`, `lite_prompt_*.md`, `test_lite_mode.py`, etc.
+  - New files (7+): `lite_tools.py`, `lite.py`, `lite_prompt_*.md`, `test_lite_mode.py`, etc.
 - **Merges:** Receives updates from `main` after upstream syncs
 
 ### `upstream-staging` (Optional)
@@ -61,7 +61,6 @@ git merge main
 
 # 4. Run tests
 pytest libs/cli/tests/
-python libs/cli/verify_lite_mode.py
 
 # 5. Push lite branch
 git push origin lite
@@ -172,7 +171,6 @@ git merge --continue  # or git rebase --continue
 
 # Test immediately
 pytest libs/cli/tests/
-python libs/cli/verify_lite_mode.py
 ```
 
 ### Preserving Lite Hooks
@@ -239,12 +237,7 @@ pytest tests/ -v
 
 # Expected: All tests pass (122 existing + 27 lite mode = 149 total)
 
-# 2. Verify lite mode configuration loading
-python verify_lite_mode.py
-
-# Expected: Shows enabled/disabled tools correctly
-
-# 3. Manual testing with small model
+# 2. Manual testing with small model
 # Create test config
 cat > /tmp/test_lite_config.toml << 'EOF'
 [models]
@@ -283,12 +276,13 @@ These files are safe from merge conflicts:
 
 ```
 libs/cli/deepagents_cli/lite_tools.py
+libs/cli/deepagents_cli/lite.py
 libs/cli/deepagents_cli/lite_prompt_granite4_350m.md
 libs/cli/deepagents_cli/lite_prompt_granite4_1b.md
 libs/cli/deepagents_cli/lite_prompt_granite4_3b.md
 libs/cli/examples/lite_config.toml
 libs/cli/tests/unit_tests/test_lite_mode.py
-LITE_MODE_SUMMARY.md
+libs/cli/verify_lite_mode.py
 FORK_MAINTENANCE.md (this file)
 ```
 
@@ -417,7 +411,6 @@ git commit -m "docs: separate lite mode documentation"
 - [ ] Merge `main` into `lite`
 - [ ] Resolve conflicts (focus on 4 shared files)
 - [ ] Run full test suite: `pytest libs/cli/tests/`
-- [ ] Verify lite mode: `python libs/cli/verify_lite_mode.py`
 - [ ] Manual test with small model
 - [ ] Push `lite` branch
 - [ ] Create lite release tag
@@ -431,7 +424,6 @@ git commit -m "docs: separate lite mode documentation"
 ### Per Release
 - [ ] Test with all three Granite 4 model sizes (350M, 1B, 3B)
 - [ ] Verify all example configs still work
-- [ ] Update LITE_MODE_SUMMARY.md if needed
 - [ ] Tag release with detailed notes
 
 ## Troubleshooting
@@ -488,7 +480,6 @@ Track releases here for reference:
 - **Upstream Repository:** https://github.com/langchain-ai/deepagents
 - **Lite Fork:** https://github.com/mecrobio/deepagents-lite
 - **Upstream Releases:** https://github.com/langchain-ai/deepagents/releases
-- **Lite Mode Summary:** [LITE_MODE_SUMMARY.md](./LITE_MODE_SUMMARY.md)
 - **Example Config:** [libs/cli/examples/lite_config.toml](./libs/cli/examples/lite_config.toml)
 
 ## Questions or Issues

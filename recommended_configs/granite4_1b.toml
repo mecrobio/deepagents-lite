@@ -1,0 +1,15 @@
+# Recommended configuration for IBM Granite 4 1B
+# Ideal for: General coding assistance, codebase exploration, bug fixing.
+[models]
+default = "openai:ibm/granite-4-1b-instruct"
+
+[models.providers.openai]
+# Replace with your actual endpoint (e.g., vLLM, WatsonX, or OpenRouter)
+base_url = "http://localhost:8080/v1"
+models = ["ibm/granite-4-1b-instruct"]
+
+[lite]
+# Auto-detects 1B profile: 
+# - System Prompt: lite_prompt_granite4_1b.md
+# - Enabled Tools: ["filesystem", "search", "shell"] (read, edit, grep, execute)
+enabled = true

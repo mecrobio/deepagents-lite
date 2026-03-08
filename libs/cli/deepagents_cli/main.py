@@ -540,6 +540,11 @@ async def run_textual_cli_async(
         model_config = ModelConfig.load()
         lite_config = model_config.lite
 
+        # Resolve lite configuration (auto-detection + user settings)
+        from deepagents_cli.lite import get_lite_config
+
+        lite_config = get_lite_config(str(result.spec), lite_config)
+
         # Create agent with conditional tools (filtered by lite config)
         tools: list[BaseTool | Callable[..., Any] | dict[str, Any]] = []
 

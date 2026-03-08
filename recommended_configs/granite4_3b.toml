@@ -1,0 +1,17 @@
+# Recommended configuration for IBM Granite 4 3B
+# Ideal for: Complex development, large refactors, full feature implementation.
+[models]
+default = "openai:ibm/granite-4-3b-instruct"
+
+[models.providers.openai]
+# Replace with your actual endpoint (e.g., vLLM, WatsonX, or OpenRouter)
+base_url = "http://localhost:8080/v1"
+models = ["ibm/granite-4-3b-instruct"]
+
+[lite]
+# Auto-detects 3B profile: 
+# - System Prompt: lite_prompt_granite4_3b.md
+# - Enabled Tools: ["filesystem", "search", "shell"] (full dev capability)
+enabled = true
+# Optional: explicitly disable heavy tools to keep context usage low
+disabled_tools = ["web", "mcp", "advanced"]

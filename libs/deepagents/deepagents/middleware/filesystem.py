@@ -4,7 +4,7 @@
 import asyncio
 import base64
 import concurrent.futures
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Sequence
 from pathlib import Path
 from typing import Annotated, Any, Literal, NotRequired, cast
 
@@ -462,6 +462,7 @@ class FilesystemMiddleware(AgentMiddleware[FilesystemState, ContextT, ResponseT]
         custom_tool_descriptions: dict[str, str] | None = None,
         tool_token_limit_before_evict: int | None = 20000,
         max_execute_timeout: int = 3600,
+        enabled_tools: Sequence[str] | None = None,
     ) -> None:
         """Initialize the filesystem middleware.
 
@@ -476,6 +477,8 @@ class FilesystemMiddleware(AgentMiddleware[FilesystemState, ContextT, ResponseT]
 
                 Defaults to 3600 seconds (1 hour). Any per-command timeout
                 exceeding this value will be rejected with an error message.
+            enabled_tools: Optional list of tool names to enable. If not provided,
+                all filesystem tools are enabled.
 
         Raises:
             ValueError: If `max_execute_timeout` is not positive.
@@ -492,7 +495,7 @@ class FilesystemMiddleware(AgentMiddleware[FilesystemState, ContextT, ResponseT]
         self._tool_token_limit_before_evict = tool_token_limit_before_evict
         self._max_execute_timeout = max_execute_timeout
 
-        self.tools = [
+        all_tools = [
             self._create_ls_tool(),
             self._create_read_file_tool(),
             self._create_write_file_tool(),
@@ -501,6 +504,11 @@ class FilesystemMiddleware(AgentMiddleware[FilesystemState, ContextT, ResponseT]
             self._create_grep_tool(),
             self._create_execute_tool(),
         ]
+
+        if enabled_tools is not None:
+            self.tools = [t for t in all_tools if t.name in enabled_tools]
+        else:
+            self.tools = all_tools
 
     def _get_backend(self, runtime: ToolRuntime[Any, Any]) -> BackendProtocol:
         """Get the resolved backend instance from backend or factory.

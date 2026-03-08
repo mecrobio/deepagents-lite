@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
+import logging
 import os
 import shutil
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
+
+logger = logging.getLogger(__name__)
 
 from deepagents import create_deep_agent
 from deepagents.backends import CompositeBackend, LocalShellBackend
@@ -41,6 +44,8 @@ from deepagents_cli.config import (
 )
 from deepagents_cli.integrations.sandbox_factory import get_default_working_dir
 from deepagents_cli.local_context import LocalContextMiddleware, _ExecutableBackend
+from deepagents_cli.lite import get_lite_config
+from deepagents_cli.lite_tools import TOOL_CATEGORIES, get_enabled_backend_type, should_disable_tool
 from deepagents_cli.subagents import list_subagents
 from deepagents_cli.unicode_security import (
     check_url_safety,
@@ -486,7 +491,9 @@ def create_cli_agent(
                 for execution
             - `composite_backend`: `CompositeBackend` for file operations
     """
-    tools = tools or []
+    # Resolve lite configuration (auto-detection + user settings)
+    model_name = model if isinstance(model, str) else getattr(model, "model_name", str(model))
+    lite_config = get_lite_config(model_name, lite_config)
 
     # Setup agent directory for persistent memory (if enabled)
     if enable_memory or enable_skills:
@@ -565,9 +572,7 @@ def create_cli_agent(
         # ========== LOCAL MODE ==========
         # Check if lite mode disables shell execution
         enable_shell_in_lite = enable_shell
-        if lite_config and lite_config.get("enabled"):
-            from deepagents_cli.lite_tools import get_enabled_backend_type
-
+        if lite_config:
             backend_type = get_enabled_backend_type(lite_config)
             if backend_type == "filesystem":
                 enable_shell_in_lite = False
@@ -607,10 +612,7 @@ def create_cli_agent(
     # Get or use custom system prompt
     if system_prompt is None:
         # Check if lite mode provides a custom prompt
-        if lite_config and lite_config.get("enabled") and lite_config.get("system_prompt_path"):
-            import logging
-
-            logger = logging.getLogger(__name__)
+        if lite_config and lite_config.get("system_prompt_path"):
             prompt_path = Path(lite_config["system_prompt_path"]).expanduser()
             if prompt_path.exists():
                 system_prompt = prompt_path.read_text()
@@ -667,20 +669,48 @@ def create_cli_agent(
 
     model = resolve_model(model)
 
-    from deepagents.middleware.summarization import (
-        SummarizationToolMiddleware,
-        create_summarization_middleware,
-    )
+    # Determine enabled filesystem tools for lite mode
+    enabled_filesystem_tools: list[str] | None = None
+    enable_todo_tool: bool = True
+    if lite_config:
+        # List of all tools FilesystemMiddleware normally provides
+        all_fs_tools = TOOL_CATEGORIES["filesystem"] + TOOL_CATEGORIES["shell"]
+        enabled_filesystem_tools = [
+            t for t in all_fs_tools if not should_disable_tool(t, lite_config)
+        ]
 
-    agent_middleware.append(
-        SummarizationToolMiddleware(
-            create_summarization_middleware(model, composite_backend)
+        # Check if write_todos should be enabled
+        if should_disable_tool("write_todos", lite_config):
+            enable_todo_tool = False
+
+        # Respect lite_config for SummarizationToolMiddleware
+        if not should_disable_tool("compact_conversation", lite_config):
+            from deepagents.middleware.summarization import (
+                SummarizationToolMiddleware,
+                create_summarization_middleware,
+            )
+
+            agent_middleware.append(
+                SummarizationToolMiddleware(
+                    create_summarization_middleware(model, composite_backend)
+                )
+            )
+    else:
+        from deepagents.middleware.summarization import (
+            SummarizationToolMiddleware,
+            create_summarization_middleware,
         )
-    )
+
+        agent_middleware.append(
+            SummarizationToolMiddleware(
+                create_summarization_middleware(model, composite_backend)
+            )
+        )
 
     # Create the agent
     # Use provided checkpointer or fallback to InMemorySaver
     final_checkpointer = checkpointer if checkpointer is not None else InMemorySaver()
+
     agent = create_deep_agent(
         model=model,
         system_prompt=system_prompt,
@@ -690,5 +720,7 @@ def create_cli_agent(
         interrupt_on=interrupt_on,
         checkpointer=final_checkpointer,
         subagents=custom_subagents or None,
+        enabled_filesystem_tools=enabled_filesystem_tools,
+        enable_todo_tool=enable_todo_tool,
     ).with_config(config)
     return agent, composite_backend

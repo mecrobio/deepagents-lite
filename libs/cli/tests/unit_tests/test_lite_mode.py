@@ -10,6 +10,8 @@ from deepagents_cli.lite_tools import (
     get_enabled_backend_type,
     should_disable_tool,
 )
+from deepagents_cli.agent import create_cli_agent
+from unittest.mock import MagicMock, patch
 from deepagents_cli.model_config import LiteConfig, ModelConfig
 
 
@@ -85,10 +87,11 @@ class TestShouldDisableTool:
 
     def test_category_in_whitelist(self):
         """Test category expansion in whitelist."""
-        config: LiteConfig = {"enabled": True, "enabled_tools": ["filesystem"]}
+        config: LiteConfig = {"enabled": True, "enabled_tools": ["filesystem", "search"]}
         assert not should_disable_tool("read_file", config)
         assert not should_disable_tool("write_file", config)
         assert not should_disable_tool("grep", config)
+        assert not should_disable_tool("glob", config)
         assert should_disable_tool("execute", config)
         assert should_disable_tool("web_search", config)
 
@@ -258,6 +261,97 @@ enabled_tools = ["read_file", "write_file"]
         # Should not raise
         config = ModelConfig.load(config_path)
         assert config.lite is not None
+
+
+class TestLiteModeToolFiltering:
+    """Test that lite mode correctly filters filesystem tools in create_cli_agent."""
+
+    def test_create_cli_agent_filters_filesystem_tools(self, tmp_path: Path):
+        """Verify that enabled_filesystem_tools is passed to create_deep_agent."""
+        lite_config = {
+            "enabled": True,
+            "disabled_tools": ["write_file", "execute"]
+        }
+        
+        # Mock dependencies to avoid filesystem access and complex agent creation
+        with patch("deepagents_cli.agent.settings") as mock_settings, \
+             patch("deepagents_cli.agent.create_deep_agent") as mock_create_deep_agent, \
+             patch("pathlib.Path.touch"), patch("pathlib.Path.mkdir"), \
+             patch("pathlib.Path.exists", return_value=True), \
+             patch("builtins.open", MagicMock()):
+            
+            mock_settings.ensure_agent_dir.return_value = tmp_path / "agent"
+            mock_settings.model_context_limit = 100000
+            
+            # Call create_cli_agent
+            create_cli_agent(
+                model="openai:gpt-4o",
+                assistant_id="test_assistant",
+                lite_config=lite_config
+            )
+            
+            # Verify create_deep_agent was called with enabled_filesystem_tools
+            _, kwargs = mock_create_deep_agent.call_args
+            enabled_tools = kwargs.get("enabled_filesystem_tools")
+            
+            assert enabled_tools is not None
+            assert "write_file" not in enabled_tools
+            assert "execute" not in enabled_tools
+            assert "read_file" in enabled_tools
+            assert "list_files" in enabled_tools
+
+    def test_create_cli_agent_disables_all_tools(self, tmp_path: Path):
+        """Verify that ALL tools can be disabled via configuration."""
+        lite_config = {
+            "enabled": True,
+            "enabled_tools": []  # Empty whitelist means everything is disabled
+        }
+        
+        with patch("deepagents_cli.agent.settings") as mock_settings, \
+             patch("deepagents_cli.agent.create_deep_agent") as mock_create_deep_agent, \
+             patch("pathlib.Path.touch"), patch("pathlib.Path.mkdir"), \
+             patch("pathlib.Path.exists", return_value=True), \
+             patch("builtins.open", MagicMock()):
+            
+            mock_settings.ensure_agent_dir.return_value = tmp_path / "agent"
+            mock_settings.model_context_limit = 100000
+            
+            create_cli_agent(
+                model="openai:gpt-4o",
+                assistant_id="test_assistant",
+                lite_config=lite_config
+            )
+            
+            _, kwargs = mock_create_deep_agent.call_args
+            enabled_tools = kwargs.get("enabled_filesystem_tools")
+            
+            # For FilesystemMiddleware, an empty list should result in zero filesystem tools
+            assert enabled_tools == []
+
+    def test_create_cli_agent_disables_todo_tool(self, tmp_path: Path):
+        """Verify that write_todos can be disabled via configuration."""
+        lite_config = {
+            "enabled": True,
+            "disabled_tools": ["write_todos"]
+        }
+        
+        with patch("deepagents_cli.agent.settings") as mock_settings, \
+             patch("deepagents_cli.agent.create_deep_agent") as mock_create_deep_agent, \
+             patch("pathlib.Path.touch"), patch("pathlib.Path.mkdir"), \
+             patch("pathlib.Path.exists", return_value=True), \
+             patch("builtins.open", MagicMock()):
+            
+            mock_settings.ensure_agent_dir.return_value = tmp_path / "agent"
+            mock_settings.model_context_limit = 100000
+            
+            create_cli_agent(
+                model="openai:gpt-4o",
+                assistant_id="test_assistant",
+                lite_config=lite_config
+            )
+            
+            _, kwargs = mock_create_deep_agent.call_args
+            assert kwargs.get("enable_todo_tool") is False
 
 
 if __name__ == "__main__":

@@ -1,0 +1,15 @@
+# Recommended configuration for IBM Granite 4 350M
+# Ideal for: Low-resource environments, ultra-fast responses, documentation, basic file edits.
+[models]
+default = "openai:ibm/granite-4-350m-instruct"
+
+[models.providers.openai]
+# Replace with your actual endpoint (e.g., vLLM, WatsonX, or OpenRouter)
+base_url = "http://localhost:8080/v1"
+models = ["ibm/granite-4-350m-instruct"]
+
+[lite]
+# Auto-detects 350M profile: 
+# - System Prompt: lite_prompt_granite4_350m.md
+# - Enabled Tools: ["filesystem"] (read, write, edit, list)
+enabled = true

@@ -9,11 +9,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from deepagents_cli.model_config import LiteConfig
+    from .model_config import LiteConfig
 
 # Tool categories for convenient filtering
 TOOL_CATEGORIES = {
-    "filesystem": ["list_files", "read_file", "write_file", "edit_file", "glob", "grep"],
+    "filesystem": ["list_files", "read_file", "write_file", "edit_file"],
+    "search": ["glob", "grep"],
     "shell": ["execute"],
     "web": ["web_search", "fetch_url", "http_request"],
     "mcp": [],  # Handled separately in main.py
@@ -22,7 +23,8 @@ TOOL_CATEGORIES = {
 """Mapping of tool categories to their constituent tool names.
 
 Categories allow users to enable/disable groups of related tools:
-- filesystem: File operations (read, write, edit, list, glob, grep)
+- filesystem: Basic file operations (read, write, edit, list)
+- search: Codebase exploration (glob, grep)
 - shell: Command execution (execute)
 - web: Network operations (web_search, fetch_url, http_request)
 - mcp: Model Context Protocol tools (all MCP servers)
@@ -42,18 +44,10 @@ def _expand_tool_list(tools: list[str]) -> list[str]:
     Examples:
         >>> _expand_tool_list(["read_file", "web"])
         ['read_file', 'web_search', 'fetch_url', 'http_request']
-        >>> _expand_tool_list(["all"])
-        ['list_files', 'read_file', ..., 'mcp', 'task', 'compact_conversation']
     """
     expanded = []
     for item in tools:
-        # Special case: "all" expands to all categories AND special tools
-        if item == "all":
-            for category_tools in TOOL_CATEGORIES.values():
-                expanded.extend(category_tools)
-            # Add special tools that don't have tools in their category
-            expanded.append("mcp")  # MCP is handled specially
-        elif item in TOOL_CATEGORIES:
+        if item in TOOL_CATEGORIES:
             # It's a category - expand it
             if item == "mcp":
                 # MCP category is empty, so add the literal "mcp" tool name
@@ -91,7 +85,7 @@ def should_disable_tool(tool_name: str, lite_config: LiteConfig | None) -> bool:
     enabled_tools = lite_config.get("enabled_tools")
 
     # Whitelist mode (enabled_tools specified)
-    if enabled_tools:
+    if enabled_tools is not None:
         expanded_enabled = _expand_tool_list(enabled_tools)
         # Tool is disabled if it's NOT in the enabled list
         return tool_name not in expanded_enabled
