@@ -153,6 +153,40 @@ class ProviderConfig(TypedDict, total=False):
     """
 
 
+class LiteConfig(TypedDict, total=False):
+    """Configuration for lite mode optimized for small language models.
+
+    Lite mode provides distilled system prompts and tool filtering for
+    smaller models (350M-7B parameters), particularly IBM Granite 4 Hybrid models.
+    """
+
+    enabled: bool
+    """Enable lite mode. When True, uses distilled prompt and filtered tools."""
+
+    system_prompt_path: str
+    """Path to distilled system prompt file.
+
+    Example prompts are provided for IBM Granite 4 Hybrid models:
+    - lite_prompt_granite4_350m.md (~800 tokens, 350M-700M params)
+    - lite_prompt_granite4_1b.md (~1500 tokens, 1B-2B params)
+    - lite_prompt_granite4_3b.md (~2200 tokens, 3B-7B params)
+    """
+
+    disabled_tools: list[str]
+    """List of tools to disable (blacklist approach).
+
+    Cannot be used together with enabled_tools. Supports individual tool names
+    and categories: filesystem, shell, web, mcp, advanced.
+    """
+
+    enabled_tools: list[str]
+    """List of tools to enable (whitelist approach).
+
+    Cannot be used together with disabled_tools. Supports individual tool names
+    and categories: filesystem, shell, web, mcp, advanced.
+    """
+
+
 DEFAULT_CONFIG_DIR = Path.home() / ".deepagents"
 """Directory for user-level Deep Agents configuration (`~/.deepagents`)."""
 
@@ -473,6 +507,9 @@ class ModelConfig:
     providers: Mapping[str, ProviderConfig] = field(default_factory=dict)
     """Read-only mapping of provider names to their configurations."""
 
+    lite: LiteConfig | None = None
+    """Lite mode configuration for small language models."""
+
     def __post_init__(self) -> None:
         """Freeze the providers dict into a read-only proxy."""
         if not isinstance(self.providers, MappingProxyType):
@@ -529,10 +566,23 @@ class ModelConfig:
             return fallback
 
         models_section = data.get("models", {})
+        lite_section = data.get("lite")
+
+        # Parse lite config if lite section exists (even if empty)
+        lite_config: LiteConfig | None = None
+        if lite_section is not None:
+            lite_config = {
+                "enabled": lite_section.get("enabled", False),
+                "system_prompt_path": lite_section.get("system_prompt_path"),
+                "disabled_tools": lite_section.get("disabled_tools"),
+                "enabled_tools": lite_section.get("enabled_tools"),
+            }
+
         config = cls(
             default_model=models_section.get("default"),
             recent_model=models_section.get("recent"),
             providers=models_section.get("providers", {}),
+            lite=lite_config,
         )
 
         # Validate config consistency
@@ -549,6 +599,18 @@ class ModelConfig:
         Issues warnings for invalid configurations but does not raise exceptions,
         allowing the app to continue with potentially degraded functionality.
         """
+        # Validate lite mode configuration
+        if self.lite and self.lite.get("enabled"):
+            disabled = self.lite.get("disabled_tools")
+            enabled = self.lite.get("enabled_tools")
+            if disabled and enabled:
+                logger.warning(
+                    "Lite mode: Cannot use both 'disabled_tools' and 'enabled_tools'. "
+                    "Using 'disabled_tools' and ignoring 'enabled_tools'."
+                )
+                # Clear enabled_tools to avoid confusion
+                self.lite["enabled_tools"] = None
+
         # Warn if default_model is set but doesn't use provider:model format
         if self.default_model and ":" not in self.default_model:
             logger.warning(

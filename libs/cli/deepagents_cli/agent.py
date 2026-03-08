@@ -29,6 +29,7 @@ if TYPE_CHECKING:
     from langgraph.runtime import Runtime
 
     from deepagents_cli.mcp_tools import MCPServerInfo
+    from deepagents_cli.model_config import LiteConfig
 
 from deepagents_cli.config import (
     COLORS,
@@ -437,6 +438,7 @@ def create_cli_agent(
     enable_shell: bool = True,
     checkpointer: BaseCheckpointSaver | None = None,
     mcp_server_info: list[MCPServerInfo] | None = None,
+    lite_config: LiteConfig | None = None,
 ) -> tuple[Pregel, CompositeBackend]:
     """Create a CLI-configured agent with flexible options.
 
@@ -472,6 +474,10 @@ def create_cli_agent(
             If `None`, uses `InMemorySaver` (no persistence across
             CLI invocations).
         mcp_server_info: MCP server metadata to surface in the system prompt.
+        lite_config: Lite mode configuration for small language models.
+
+            When enabled, uses distilled system prompts and filtered tools
+            optimized for smaller models (350M-7B parameters).
 
     Returns:
         2-tuple of `(agent_graph, backend)`
@@ -557,7 +563,16 @@ def create_cli_agent(
     # CONDITIONAL SETUP: Local vs Remote Sandbox
     if sandbox is None:
         # ========== LOCAL MODE ==========
-        if enable_shell:
+        # Check if lite mode disables shell execution
+        enable_shell_in_lite = enable_shell
+        if lite_config and lite_config.get("enabled"):
+            from deepagents_cli.lite_tools import get_enabled_backend_type
+
+            backend_type = get_enabled_backend_type(lite_config)
+            if backend_type == "filesystem":
+                enable_shell_in_lite = False
+
+        if enable_shell_in_lite:
             # Create environment for shell commands
             # Restore user's original LANGSMITH_PROJECT so their code traces separately
             shell_env = os.environ.copy()
@@ -591,9 +606,26 @@ def create_cli_agent(
 
     # Get or use custom system prompt
     if system_prompt is None:
-        system_prompt = get_system_prompt(
-            assistant_id=assistant_id, sandbox_type=sandbox_type
-        )
+        # Check if lite mode provides a custom prompt
+        if lite_config and lite_config.get("enabled") and lite_config.get("system_prompt_path"):
+            import logging
+
+            logger = logging.getLogger(__name__)
+            prompt_path = Path(lite_config["system_prompt_path"]).expanduser()
+            if prompt_path.exists():
+                system_prompt = prompt_path.read_text()
+                logger.info(f"Using lite mode prompt: {prompt_path}")
+            else:
+                logger.warning(
+                    f"Lite mode prompt not found: {prompt_path}, using default system prompt"
+                )
+                system_prompt = get_system_prompt(
+                    assistant_id=assistant_id, sandbox_type=sandbox_type
+                )
+        else:
+            system_prompt = get_system_prompt(
+                assistant_id=assistant_id, sandbox_type=sandbox_type
+            )
 
     # Configure interrupt_on based on auto_approve setting
     interrupt_on: dict[str, bool | InterruptOnConfig] | None = None

@@ -504,7 +504,8 @@ async def run_textual_cli_async(
     from deepagents_cli.agent import create_cli_agent
     from deepagents_cli.app import run_textual_app
     from deepagents_cli.config import console, create_model, settings
-    from deepagents_cli.model_config import ModelConfigError
+    from deepagents_cli.lite_tools import should_disable_tool
+    from deepagents_cli.model_config import ModelConfig, ModelConfigError
     from deepagents_cli.sessions import get_checkpointer
     from deepagents_cli.tools import fetch_url, http_request, web_search
 
@@ -535,36 +536,45 @@ async def run_textual_cli_async(
 
     # Use async context manager for checkpointer
     async with get_checkpointer() as checkpointer:
-        # Create agent with conditional tools
-        tools: list[BaseTool | Callable[..., Any] | dict[str, Any]] = [
-            http_request,
-            fetch_url,
-        ]
-        if settings.has_tavily:
+        # Load lite mode configuration
+        model_config = ModelConfig.load()
+        lite_config = model_config.lite
+
+        # Create agent with conditional tools (filtered by lite config)
+        tools: list[BaseTool | Callable[..., Any] | dict[str, Any]] = []
+
+        # Add CLI tools based on lite config
+        if not should_disable_tool("http_request", lite_config):
+            tools.append(http_request)
+        if not should_disable_tool("fetch_url", lite_config):
+            tools.append(fetch_url)
+        if settings.has_tavily and not should_disable_tool("web_search", lite_config):
             tools.append(web_search)
 
         # Load MCP tools (explicit config, auto-discovery, or disabled)
         mcp_session_manager = None
         mcp_server_info = None
-        try:
-            from deepagents_cli.mcp_tools import resolve_and_load_mcp_tools
+        # Check if MCP should be disabled by lite config or command line flag
+        if not should_disable_tool("mcp", lite_config) and not no_mcp:
+            try:
+                from deepagents_cli.mcp_tools import resolve_and_load_mcp_tools
 
-            (
-                mcp_tools,
-                mcp_session_manager,
-                mcp_server_info,
-            ) = await resolve_and_load_mcp_tools(
-                explicit_config_path=mcp_config_path,
-                no_mcp=no_mcp,
-                trust_project_mcp=trust_project_mcp,
-            )
-            tools.extend(mcp_tools)
-        except FileNotFoundError as e:
-            console.print(f"[red]✗ MCP config file not found: {e}[/red]")
-            sys.exit(1)
-        except RuntimeError as e:
-            console.print(f"[red]✗ Failed to load MCP tools: {e}[/red]")
-            sys.exit(1)
+                (
+                    mcp_tools,
+                    mcp_session_manager,
+                    mcp_server_info,
+                ) = await resolve_and_load_mcp_tools(
+                    explicit_config_path=mcp_config_path,
+                    no_mcp=False,  # We already checked above
+                    trust_project_mcp=trust_project_mcp,
+                )
+                tools.extend(mcp_tools)
+            except FileNotFoundError as e:
+                console.print(f"[red]✗ MCP config file not found: {e}[/red]")
+                sys.exit(1)
+            except RuntimeError as e:
+                console.print(f"[red]✗ Failed to load MCP tools: {e}[/red]")
+                sys.exit(1)
 
         # Handle sandbox mode
         sandbox_backend = None
@@ -601,6 +611,7 @@ async def run_textual_cli_async(
                 auto_approve=auto_approve,
                 checkpointer=checkpointer,
                 mcp_server_info=mcp_server_info,
+                lite_config=lite_config,
             )
         except Exception as e:  # broad catch for friendly CLI errors
             logger.debug("Failed to create agent", exc_info=True)
