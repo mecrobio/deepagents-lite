@@ -711,6 +711,11 @@ def create_cli_agent(
     # Use provided checkpointer or fallback to InMemorySaver
     final_checkpointer = checkpointer if checkpointer is not None else InMemorySaver()
 
+    # Check if task/subagents should be disabled by lite config
+    enable_subagents = True
+    if lite_config and should_disable_tool("task", lite_config):
+        enable_subagents = False
+
     agent = create_deep_agent(
         model=model,
         system_prompt=system_prompt,
@@ -719,7 +724,7 @@ def create_cli_agent(
         middleware=agent_middleware,
         interrupt_on=interrupt_on,
         checkpointer=final_checkpointer,
-        subagents=custom_subagents or None,
+        subagents=custom_subagents if enable_subagents else None,
         enabled_filesystem_tools=enabled_filesystem_tools,
         enable_todo_tool=enable_todo_tool,
     ).with_config(config)
