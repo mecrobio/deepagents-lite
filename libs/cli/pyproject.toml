@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "deepagents-cli"
+name = "deepagents-lite"
 version = "0.0.29"
 description = "Terminal interface for Deep Agents - interactive AI agent with file operations, shell access, and sub-agent capabilities."
 readme = "README.md"
@@ -84,20 +84,18 @@ perplexity = ["langchain-perplexity>=1.0.0,<2.0.0"]
 vertexai = ["langchain-google-vertexai>=3.0.0,<4.0.0"]
 xai = ["langchain-xai>=1.0.0,<2.0.0"]
 all-providers = [
-    "deepagents-cli[anthropic,bedrock,cohere,deepseek,fireworks,google-genai,groq,huggingface,ibm,mistralai,nvidia,ollama,openai,openrouter,perplexity,vertexai,xai]",
+    "deepagents-lite[anthropic,bedrock,cohere,deepseek,fireworks,google-genai,groq,huggingface,ibm,mistralai,nvidia,ollama,openai,openrouter,perplexity,vertexai,xai]",
 ]
 
 [project.scripts]
-deepagents = "deepagents_cli:cli_main"
-deepagents-cli = "deepagents_cli:cli_main"
+deepagents-lite = "deepagents_cli:cli_main"
 
 [project.urls]
-Homepage = "https://docs.langchain.com/oss/python/deepagents/overview"
-Documentation = "https://reference.langchain.com/python/deepagents/"
-Repository = "https://github.com/langchain-ai/deepagents"
-Issues = "https://github.com/langchain-ai/deepagents/issues"
-Changelog = "https://github.com/langchain-ai/deepagents/blob/main/libs/cli/CHANGELOG.md"
-Twitter = "https://x.com/LangChain"
+Homepage = "https://github.com/mecrobio/deepagents-lite"
+Documentation = "https://github.com/mecrobio/deepagents-lite/tree/lite/libs/cli"
+Repository = "https://github.com/mecrobio/deepagents-lite"
+Issues = "https://github.com/mecrobio/deepagents-lite/issues"
+Changelog = "https://github.com/mecrobio/deepagents-lite/blob/lite/libs/cli/CHANGELOG.md"
 
 [dependency-groups]
 test = [

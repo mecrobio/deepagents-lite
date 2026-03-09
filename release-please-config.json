@@ -56,8 +56,8 @@
   "packages": {
     "libs/cli": {
       "release-type": "python",
-      "package-name": "deepagents-cli",
-      "component": "deepagents-cli",
+      "package-name": "deepagents-lite",
+      "component": "deepagents-lite",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
       "extra-files": [

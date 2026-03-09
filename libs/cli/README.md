@@ -1,8 +1,8 @@
 # 🧠🤖 Deep Agents CLI
 
-[![PyPI - Version](https://img.shields.io/pypi/v/deepagents-cli?label=%20)](https://pypi.org/project/deepagents-cli/#history)
-[![PyPI - License](https://img.shields.io/pypi/l/deepagents-cli)](https://opensource.org/licenses/MIT)
-[![PyPI - Downloads](https://img.shields.io/pepy/dt/deepagents-cli)](https://pypistats.org/packages/deepagents-cli)
+[![PyPI - Version](https://img.shields.io/pypi/v/deepagents-lite?label=%20)](https://pypi.org/project/deepagents-lite/#history)
+[![PyPI - License](https://img.shields.io/pypi/l/deepagents-lite)](https://opensource.org/licenses/MIT)
+[![PyPI - Downloads](https://img.shields.io/pepy/dt/deepagents-lite)](https://pypistats.org/packages/deepagents-lite)
 [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/langchain.svg?style=social&label=Follow%20%40LangChain)](https://x.com/langchain)
 
 <p align="center">
@@ -12,25 +12,25 @@
 ## Quick Install
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/langchain-ai/deepagents/main/scripts/install.sh | bash
+curl -LsSf https://raw.githubusercontent.com/mecrobio/deepagents-lite/lite/scripts/install.sh | bash
 ```
 
 ```bash
 # With model provider extras (OpenAI is included by default)
-DEEPAGENTS_EXTRAS="anthropic,groq" curl -LsSf https://raw.githubusercontent.com/langchain-ai/deepagents/main/scripts/install.sh | bash
+DEEPAGENTS_EXTRAS="anthropic,groq" curl -LsSf https://raw.githubusercontent.com/mecrobio/deepagents-lite/lite/scripts/install.sh | bash
 ```
 
 Or install directly with `uv`:
 
 ```bash
 # Install with chosen model providers (OpenAI is included by default)
-uv tool install 'deepagents-cli[anthropic,groq]'
+uv tool install 'deepagents-lite[anthropic,groq]'
 ```
 
 Run the CLI:
 
 ```bash
-deepagents
+deepagents-lite
 ```
 
 ## 🤔 What is this?
@@ -68,7 +68,7 @@ Deep Agents CLI includes "lite mode" optimized for smaller models, particularly 
 
 3. **Run DeepAgents**:
    ```bash
-   deepagents
+   deepagents-lite
    ```
 
 For detailed configuration and model-specific profiles, see [LITE_MODE.md](LITE_MODE.md).
@@ -276,10 +276,10 @@ enabled = true
 
 ## 📖 Resources
 
-- **[CLI Documentation](https://docs.langchain.com/oss/python/deepagents/cli/overview)** — Full documentation
-- **[CLI Source](https://github.com/langchain-ai/deepagents/tree/main/libs/cli)** — Full source code
-- **[Deep Agents SDK](https://github.com/langchain-ai/deepagents)** — The underlying agent harness
-- **[Chat LangChain](https://chat.langchain.com)** - Chat interactively with the docs
+- **[Fork Repository](https://github.com/mecrobio/deepagents-lite)** — This fork's repository
+- **[CLI Source](https://github.com/mecrobio/deepagents-lite/tree/lite/libs/cli)** — Full source code
+- **[Upstream Deep Agents](https://github.com/langchain-ai/deepagents)** — Original upstream project
+- **[Upstream Documentation](https://docs.langchain.com/oss/python/deepagents/cli/overview)** — Upstream docs (most features apply)
 
 ## 📕 Releases & Versioning
 

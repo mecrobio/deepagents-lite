@@ -76,28 +76,28 @@ MCP is supported via [`langchain-mcp-adapters`](https://github.com/langchain-ai/
 Try Deep Agents instantly from the terminal. Install:
 
 ```bash
-curl -LsSf https://raw.githubusercontent.com/langchain-ai/deepagents/main/scripts/install.sh | bash
+curl -LsSf https://raw.githubusercontent.com/mecrobio/deepagents-lite/lite/scripts/install.sh | bash
 ```
 
 ```bash
 # With model provider extras (OpenAI is included by default)
-DEEPAGENTS_EXTRAS="anthropic,groq" curl -LsSf https://raw.githubusercontent.com/langchain-ai/deepagents/main/scripts/install.sh | bash
+DEEPAGENTS_EXTRAS="anthropic,groq" curl -LsSf https://raw.githubusercontent.com/mecrobio/deepagents-lite/lite/scripts/install.sh | bash
 ```
 
 Or install directly with `uv`:
 
 ```bash
 # Install with chosen model providers (OpenAI is included by default)
-uv tool install 'deepagents-cli[anthropic,groq]'
+uv tool install 'deepagents-lite[anthropic,groq]'
 ```
 
 Run the CLI:
 
 ```bash
-deepagents
+deepagents-lite
 ```
 
-The CLI adds conversation resume, web search, remote sandboxes (Modal, Runloop, Daytona, & more), persistent memory, custom skills, headless mode, and human-in-the-loop approval. See the [CLI documentation](https://docs.langchain.com/oss/python/deepagents/cli) and [source code](https://github.com/langchain-ai/deepagents/tree/main/libs/cli) for more.
+The CLI adds conversation resume, web search, remote sandboxes (Modal, Runloop, Daytona, & more), persistent memory, custom skills, headless mode, and human-in-the-loop approval. See the [source code](https://github.com/mecrobio/deepagents-lite/tree/lite/libs/cli) and [upstream CLI documentation](https://docs.langchain.com/oss/python/deepagents/cli) for more.
 
 ## LangGraph Native
 
@@ -138,7 +138,7 @@ This is a monorepo containing all Deep Agents packages:
 | Package | PyPI | Description |
 | ------- | ---- | ----------- |
 | [`deepagents`](libs/deepagents/) | [![Version](https://img.shields.io/pypi/v/deepagents?label=%20)](https://pypi.org/project/deepagents/) | Core SDK — `create_deep_agent`, middleware, backends |
-| [`deepagents-cli`](libs/cli/) | [![Version](https://img.shields.io/pypi/v/deepagents-cli?label=%20)](https://pypi.org/project/deepagents-cli/) | Interactive terminal interface with TUI, web search, and sandboxes |
+| [`deepagents-lite`](libs/cli/) | [![Version](https://img.shields.io/pypi/v/deepagents-lite?label=%20)](https://pypi.org/project/deepagents-lite/) | Interactive terminal interface with TUI, web search, and sandboxes |
 | [`deepagents-acp`](libs/acp/) | [![Version](https://img.shields.io/pypi/v/deepagents-acp?label=%20)](https://pypi.org/project/deepagents-acp/) | [Agent Client Protocol](https://agentclientprotocol.com) integration for editors like Zed |
 | [`deepagents-harbor`](libs/harbor/) | - | [Harbor](https://harborframework.com) evaluation and benchmark framework |
 | [`langchain-daytona`](libs/partners/daytona/) | [![Version](https://img.shields.io/pypi/v/langchain-daytona?label=%20)](https://pypi.org/project/langchain-daytona/) | Daytona sandbox integration |

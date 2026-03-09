@@ -189,7 +189,7 @@ Kept short so tracing metadata can never stall CLI flows.
 
 
 def _is_editable_install() -> bool:
-    """Check if deepagents-cli is installed in editable mode.
+    """Check if deepagents-lite is installed in editable mode.
 
     Uses PEP 610 direct_url.json metadata to detect editable installs.
 
@@ -201,7 +201,7 @@ def _is_editable_install() -> bool:
         return _editable_cache
 
     try:
-        dist = distribution("deepagents-cli")
+        dist = distribution("deepagents-lite")
         direct_url = dist.read_text("direct_url.json")
         if direct_url:
             data = json.loads(direct_url)
@@ -275,7 +275,7 @@ _UNICODE_BANNER = f"""
 ██╔══██║ ██║   ██║ ██╔══╝   ██║╚██╗██║    ██║    ╚════██║
 ██║  ██║ ╚██████╔╝ ███████╗ ██║ ╚████║    ██║    ███████║
 ╚═╝  ╚═╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝    ╚═╝    ╚══════╝
-                                                  v{__version__}
+                                           (lite) v{__version__}
 """
 _ASCII_BANNER = f"""
  ____  ____  ____  ____
@@ -289,7 +289,7 @@ _ASCII_BANNER = f"""
   / _ \\| |  _ | |_  |  \\| |  | |  \\___ \\
  / ___ \\ |_| ||  _| | |\\  |  | |   ___) |
 /_/   \\_\\____||____||_| \\_|  |_|  |____/
-                                  v{__version__}
+                           (lite) v{__version__}
 """
 
 

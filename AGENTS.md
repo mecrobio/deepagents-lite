@@ -200,7 +200,7 @@ def send_email(to: str, msg: str, *, priority: str = "normal") -> bool:
 
 ### Deep Agents CLI (`libs/cli/`)
 
-`deepagents-cli` uses [Textual](https://textual.textualize.io/) for its terminal UI framework.
+`deepagents-lite` uses [Textual](https://textual.textualize.io/) for its terminal UI framework.
 
 **Key Textual resources:**
 

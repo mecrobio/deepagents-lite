@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Install deepagents-cli via uv.
+# Install deepagents-lite via uv.
 #
 # Usage:
-#   curl -LsSf https://raw.githubusercontent.com/langchain-ai/deepagents/main/scripts/install.sh | bash
+#   curl -LsSf https://raw.githubusercontent.com/mecrobio/deepagents-lite/lite/scripts/install.sh | bash
 #
 # Environment variables:
 #   DEEPAGENTS_EXTRAS  — comma-separated pip extras, e.g. "anthropic" or "anthropic,groq"
@@ -62,14 +62,14 @@ if [ -z "${UV_BIN:-}" ]; then
   fi
 fi
 
-PACKAGE="deepagents-cli${EXTRAS}"
+PACKAGE="deepagents-lite${EXTRAS}"
 echo "Installing ${PACKAGE}..." >&2
 "$UV_BIN" tool install --python "$PYTHON_VERSION" "$PACKAGE" 2>/dev/null \
   || "$UV_BIN" tool upgrade --python "$PYTHON_VERSION" "$PACKAGE"
 
 echo ""
-echo "deepagents-cli installed successfully."
-echo "Run:  deepagents"
+echo "deepagents-lite installed successfully."
+echo "Run:  deepagents-lite"
 echo ""
 echo "If the command is not found, restart your shell or run:"
 echo "  source ~/.zshrc   # (or ~/.bashrc)"

@@ -58,13 +58,13 @@ def check_cli_dependencies() -> None:
 
     if missing:
         print("\nMissing required CLI dependencies!")  # noqa: T201  # CLI output for missing dependencies
-        print("\nThe following packages are required to use the deepagents CLI:")  # noqa: T201  # CLI output for missing dependencies
+        print("\nThe following packages are required to use the deepagents-lite CLI:")  # noqa: T201  # CLI output for missing dependencies
         for pkg in missing:
             print(f"  - {pkg}")  # noqa: T201  # CLI output for missing dependencies
         print("\nPlease install them with:")  # noqa: T201  # CLI output for missing dependencies
-        print("  pip install deepagents[cli]")  # noqa: T201  # CLI output for missing dependencies
+        print("  pip install deepagents-lite")  # noqa: T201  # CLI output for missing dependencies
         print("\nOr install all dependencies:")  # noqa: T201  # CLI output for missing dependencies
-        print("  pip install 'deepagents[cli]'")  # noqa: T201  # CLI output for missing dependencies
+        print("  pip install 'deepagents-lite'")  # noqa: T201  # CLI output for missing dependencies
         sys.exit(1)
 
 
